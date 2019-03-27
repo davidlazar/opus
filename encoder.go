@@ -45,6 +45,12 @@ bridge_encoder_get_bitrate(OpusEncoder *st, opus_int32 *bitrate)
 }
 
 int
+bridge_encoder_set_vbr(OpusEncoder *st, opus_int32 vbr)
+{
+	return opus_encoder_ctl(st, OPUS_SET_VBR(vbr));
+}
+
+int
 bridge_encoder_set_complexity(OpusEncoder *st, opus_int32 complexity)
 {
 	return opus_encoder_ctl(st, OPUS_SET_COMPLEXITY(complexity));
@@ -285,6 +291,19 @@ func (enc *Encoder) Bitrate() (int, error) {
 		return 0, Error(res)
 	}
 	return int(bitrate), nil
+}
+
+// SetVBR enables or disables VBR in the encoder.
+func (enc *Encoder) SetVBR(useVBR bool) error {
+	x := 1
+	if !useVBR {
+		x = 0
+	}
+	res := C.bridge_encoder_set_vbr(enc.p, C.opus_int32(x))
+	if res != C.OPUS_OK {
+		return Error(res)
+	}
+	return nil
 }
 
 // SetComplexity sets the encoder's computational complexity
